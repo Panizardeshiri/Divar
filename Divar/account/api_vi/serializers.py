@@ -6,11 +6,18 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 import re
 from rest_framework.response import Response
+from ..models.profile import *
+from advertisement.serializers import *
 
 User = get_user_model()
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
 
+        
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(max_length=250, write_only=True)
     class Meta:
@@ -26,7 +33,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({ 'detail' : error_message })        
    
             return attr
-
 
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('password1'):
@@ -52,21 +58,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
     
 
-
 class UserVerificationSerializer(serializers.Serializer):
      verification_code = serializers.CharField(max_length=6)
 
-     class Meta:
-        model = User
-        fields =('verification_code',)
-
-        
-
-
-
-         
-    
-    
 
     
 class UserLoginSerializer(TokenObtainPairSerializer):
@@ -86,27 +80,81 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         return data
 
 
-
-
 class UserLogoutSerializer(TokenBlacklistSerializer):
     def validate(self, attrs):
         data = super(UserLogoutSerializer, self).validate(attrs)
-
         data['detail'] = "successfully logged out"
 
         return data
 
 
 
+class ForgetPassSerializer(serializers.Serializer):
+    username=serializers.CharField(max_length=255)
+
+
+class ResetPassSerializer(serializers.Serializer):
+
+    forget_code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(max_length=250, write_only=True)
+    new_password_confirm = serializers.CharField(max_length=250, write_only=True)
+
+    def validate(self, attrs):
+        if attrs.get('new_password') != attrs.get('new_password_confirm'):
+            raise serializers.ValidationError({'detail':'Password does not match'})
+        try:
+            validators.validate_password(password=attrs.get('new_password'))
+        
+        except exceptions.ValidationError as e:
+            raise serializers.ValidationError({ "detail": list(e.messages)})
+        
+        return super(ResetPassSerializer, self).validate(attrs)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    Saved_Ads = serializers.SerializerMethodField()
+    # My_Ads = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile 
+        fields = '__all__'
+
+
+    def get_Saved_Ads(self, obj):
+        saved_ads = obj.Saved_Ads.all()
+        saved_data = []
+        for ad in saved_ads:            
+            if ad.category_name == 'car':
+                cars = Car.objects.filter(id=ad.ads_id)
+                if cars.exists():
+                    print('((((((((((((((((()))))))))))))))))', cars[0])
+                    serializer = CarSerializer(cars)
+                    saved_data.append(serializer.data[0])
+            
+            if ad.category_name == 'real_estate':
+                real_state = RealEstate.objects.filter(id=ad.ads_id)
+                if real_state.exists():
+                    serializer = RealEstateSerializer(real_state)
+                    saved_data.append(serializer.data)
+
+            if ad.category_name == 'other':
+                other_ads = OthersAds.objects.filter(id=ad.ads_id)
+                serializer = OtherAdsSerializer(other_ads)
+                saved_data.append(serializer.data)
+            
+        # sorted_saved_data = sorted(saved_data, key=lambda x: x['created_date'], reverse=True)
+        return saved_data
+    
+    # def get_My_Ads(self, obj):
+
+    
 
 
 
 
 
 
-# from ..models.account import YourModel
 
-# class YourModelSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = YourModel
-#         fields = ['id', 'name', 'data']
+
+
+

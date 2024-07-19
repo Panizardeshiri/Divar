@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models.account import *
+from .models.profile import *
 # Register your models here.
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -11,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
        ('Authentication',{
            "fields":(
-              'username', 'email','password' ,'verification_code'
+              'username', 'email','password' ,'verification_code','forget_code'
            ),
        }),
        ('permissions', {
@@ -29,3 +30,5 @@ class CustomUserAdmin(UserAdmin):
     )
 
 admin.site.register(User,CustomUserAdmin)
+admin.site.register(Profile)
+admin.site.register(SavedAds)

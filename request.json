@@ -1,0 +1,25 @@
+{
+    "register" :[
+        {"url": "/account/api-vi/sign-up/", "params": [{
+            "title": "username",
+            "type": "email",
+            "required": "1",
+            "value": "dfs"
+        }, 
+        {
+            "title": "password",
+            "type":"pass",
+            "required":"1",
+            "value": "asdgasg"
+        },
+        {
+            "title": "password1",
+            "type": "pass",
+            "required": "1"
+        }
+        
+        ]}
+    ]
+}
+
+{"form_type":[ "email", "pass", "text", "integer", "image","date", "boolean" ]}

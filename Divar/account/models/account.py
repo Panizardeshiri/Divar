@@ -33,6 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active       = models.BooleanField(default=True)
     is_verified     = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=5,default=0)
+    forget_code = models.CharField(max_length=5,default=0)
+    stars = models.CharField(max_length=2,blank=True, null=True)
     
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []

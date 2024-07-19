@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'mail_templated',
+    'advertisement'
+  
 
 
 ]
@@ -52,7 +54,14 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
+    'http://172.0.0.1:4200',
 ]
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Custom-Header',  # Your custom header
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'Divar.urls'
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
@@ -183,4 +192,10 @@ EMAIL_HOST_PASSWORD = 'pfubmmmfddoxfobx'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 
+
+
+
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
+MEDIA_URL = '/mediafiles/'
+DOMAIN_URL = 'http://127.0.0.1:8000'
 
