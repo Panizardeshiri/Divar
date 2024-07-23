@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status,permissions
 from rest_framework.response import Response
 from .models import  RealEstate, Car
 from .serializers import *
@@ -18,12 +18,11 @@ class CategoryView(APIView):
         return Response(serializer.data)
 
 class RealEstateView(APIView):
-    serializer_class = RealEstateSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
         realstate = RealEstate.objects.all()
-        serializer = self.serializer_class(realstate,many=True)
+        serializer = RealEstateSerializer(realstate,many=True)
         return Response(serializer.data)
 
     def post(self,request):
@@ -39,16 +38,16 @@ class RealEstateView(APIView):
     
 
 class CarView(APIView):
-    serializer_class = CarSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self,request): 
-        cars = Car.objects.all()
-        serializer = self.serializer_class(cars,many=True)
+        cars = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) )
+        serializer = CarSerializer(cars,many=True)
         return Response(serializer.data)
 
     def post(self,request):
         user = request.user
+        print(user.id)
         if user == User.objects.get(id = request.data['user']):
 
             serializer = CarImagesSerializer( data= request.data)
@@ -63,12 +62,11 @@ class CarView(APIView):
 
 
 class OtherAdsView(APIView):
-    serializer_class = OtherAdsSerializer
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
         otherAds= OthersAds.objects.all()
-        serializer = self.serializer_class(otherAds,many=True)
+        serializer = OtherAdsSerializer(otherAds,many=True)
         return Response(serializer.data)
 
     def post(self,request):
@@ -89,37 +87,19 @@ class OtherAdsView(APIView):
 class HomeView(APIView):
 
     def get(self,request):
-        Cars = Car.objects.filter(Is_show=True)
-        RealStates = RealEstate.objects.filter(Is_show=True)
-        otherAds= OthersAds.objects.filter(Is_show=True)
+        Cars = Car.objects.filter(Q(Is_show=True) & Q(is_published = True))
+        RealStates = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True))
+        otherAds= OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True))
         car_serializer = CarSerializer(Cars,many=True)
         realstate_serializer = RealEstateSerializer(RealStates,many=True)
         otherAds_serializer = OtherAdsSerializer(otherAds,many =True)
 
         data = car_serializer.data + realstate_serializer.data + otherAds_serializer.data
         sorted_data = sorted(data, key=lambda x: x['created_date'], reverse=True)
-        # print(sorted_data)
-        user = request.user
-        profile = Profile.objects.get(user=user)
-        saved_ads = profile.Saved_Ads.all()
-        saved_data = []
-        for ad in saved_ads:
-            
-            if ad.category_name == 'car':
-                serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
-            
-            if ad.category_name == 'real_estate':
-                serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
-
-            if ad.category_name == 'other':
-                serializer = OtherAdsSerializer(OthersAds.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
         
 
-        return Response({'All_ads':sorted_data,
-                         'Saved_ads':saved_data})
+        return Response({'All_ads':sorted_data})
+
 
 class AdsDetailView(APIView):
 
@@ -132,7 +112,7 @@ class AdsDetailView(APIView):
             serializer = CarSerializer(add)
             return Response(serializer.data)
         
-        elif category_name =='real_estate':
+        elif category_name =='realestate':
             add = RealEstate.objects.get(id =id)
             add.Visit_count +=1
             add.save()
@@ -172,14 +152,49 @@ class AdsDetailView(APIView):
                 add.Is_show = False
             add.save()
             return Response('add is deleted')
-            
-     
+        
+    
+
+
+
+
+
+        
+
+
+
 
 
 
 
 class SaveAdsView(APIView):
     permission_classes = [IsAuthenticated] 
+
+    def get(self,request):
+        user = request.user
+        profile = Profile.objects.get(user=user)
+        saved_ads = profile.Saved_Ads.all()
+        saved_data = []
+        for ad in saved_ads:
+            
+            if ad.category_name == 'car':
+                serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
+                saved_data.append(serializer.data)
+            
+            if ad.category_name == 'real_estate':
+                serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
+                saved_data.append(serializer.data)
+
+            if ad.category_name == 'other':
+                serializer = OtherAdsSerializer(OthersAds.objects.get(id=ad.ads_id))
+                saved_data.append(serializer.data)
+        
+
+        return Response({
+                         'Saved_ads':saved_data})
+
+   
+            
     def post(self, request):
         profile = Profile.objects.get(user=request.user)
         if request.data['status']=='save':
@@ -207,17 +222,17 @@ class SearchByCategoryView(APIView):
 
        
         if category_name.lower() == 'car':
-            adds = Car.objects.filter(BodyType=sub_name)
+            adds = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(BodyType=sub_name))
             serializer =CarSerializer(adds,many=True)
             print('--------------------------', adds)
             return Response(serializer.data)
         elif category_name.lower() == 'real_state':
-            real_state = RealEstate.objects.filter(Propertytype=sub_name)
+            real_state = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name))
             serializer = RealEstateSerializer(real_state,many=True)
             return Response(serializer.data)
         
         elif category_name.lower() == 'other':
-            other = OthersAds.objects.filter(Propertytype=sub_name)
+            other = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name))
             serializer = OtherAdsSerializer(other,many=True)
             return Response(serializer.data)
 
@@ -254,7 +269,7 @@ class SearchAdsView(APIView):
 
 def get_data_by_search(title_name, city_name ):
     all_data = []
-    car_ads = Car.objects.filter(
+    car_ads = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) &
 
         (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
@@ -265,7 +280,7 @@ def get_data_by_search(title_name, city_name ):
         all_data.append(data)
     
 
-    real_estate_ads = RealEstate.objects.filter(
+    real_estate_ads = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) &
 
         (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
@@ -277,7 +292,7 @@ def get_data_by_search(title_name, city_name ):
     
 
 
-    other_ads = OthersAds.objects.filter(
+    other_ads = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) &
 
         (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
@@ -292,4 +307,25 @@ def get_data_by_search(title_name, city_name ):
 
     return sorted_data
 
-   
+
+
+
+# print(sorted_data)
+        # user = request.user
+        # profile = Profile.objects.get(user=user)
+        # saved_ads = profile.Saved_Ads.all()
+        # saved_data = []
+        # for ad in saved_ads:
+            
+        #     if ad.category_name == 'car':
+        #         serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
+        #         saved_data.append(serializer.data)
+            
+        #     if ad.category_name == 'real_estate':
+        #         serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
+        #         saved_data.append(serializer.data)
+
+        #     if ad.category_name == 'other':
+        #         serializer = OtherAdsSerializer(OthersAds.objects.get(id=ad.ads_id))
+        #         saved_data.append(serializer.data)
+        

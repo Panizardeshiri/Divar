@@ -20,6 +20,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,7 +34,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'mail_templated',
-    'advertisement'
+    'advertisement',
+    'channels'
   
 
 
@@ -81,13 +83,27 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'Divar.wsgi.application'
+# WSGI_APPLICATION = 'Divar.wsgi.application'
+ASGI_APPLICATION = "Divar.asgi.application"
 AUTH_USER_MODEL = 'account.User'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+        'CONFIG': {
+            "host": [("localhost", 5672)],
+        },
+    },
+}
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+        'CONFIG': {
+            "host": [("localhost", 5672)],
+        },
+    },
+}
 
 DATABASES = {
 'default': {
@@ -100,9 +116,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -127,9 +140,13 @@ REST_FRAMEWORK = {
     ]
 }
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # This should be there by default
+    # Add any other authentication backends you are using
+]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
+
+
 
 LANGUAGE_CODE = 'en-us'
 
@@ -140,13 +157,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from datetime import timedelta

@@ -40,10 +40,21 @@ class CarSerializer(serializers.ModelSerializer):
     category        = CategorySerializer()
     user            = UserSerializer()
     images = serializers.CharField(source="get_car_images")
-
+    # car_ad_message = MessageToAdSerializer(many=True,read_only = True)
+    admin_message = serializers.CharField()
     class Meta:
         model = Car
+        # fields = ('id','images','category','user','car_ad_message')
         fields = '__all__'
+    
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     if not instance.is_published:
+    #         representation['admin_message'] = (instance.admin_message, many=True).data
+    #     else:
+    #         representation.pop('admin_message',None)
+    #     return representation
+
 
 
 class CarImageSerializer(serializers.ModelSerializer):

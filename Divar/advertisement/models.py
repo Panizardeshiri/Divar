@@ -113,6 +113,8 @@ class RealEstate(models.Model):
     City =models.CharField(max_length=300,blank=True,null=True)
     Visit_count =models.IntegerField(default=0)
     Is_show = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=False)
+    admin_message = models.TextField(blank=True,null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     
@@ -202,6 +204,8 @@ class Car(models.Model):
     City =models.CharField(max_length=300,blank=True,null=True)
     Visit_count =models.IntegerField(default=0)
     Is_show = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=False)
+    admin_message = models.TextField(blank=True,null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 
@@ -247,6 +251,8 @@ class OthersAds(models.Model):
     City =models.CharField(max_length=300,blank=True,null=True)
     Visit_count =models.IntegerField(default=0)
     Is_show = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=False)
+    admin_message = models.TextField(blank=True,null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     
@@ -297,6 +303,7 @@ class OtherImage(models.Model):
 
     def __str__(self):
         return str(self.other.title)
+
 
 
   
