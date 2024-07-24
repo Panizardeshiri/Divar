@@ -14,6 +14,8 @@ urlpatterns = [
     path('saved-ads/', SaveAdsView.as_view(), name='saved_ads' ),
     path('ads-detail/<str:category_name>/<int:id>', AdsDetailView.as_view(), name='ads_detail'),
     path('search-ads/', SearchAdsView.as_view(), name='search_ads' ),
+    # path('conversations/', ConverstationsView.as_view(), name='conversations'  ),
+    # path('conversations/<str:username>/', ConversationMessageView.as_view(), name='conversation_messages'  ),
     # path('message-to-ad/<int:id>', MessageToAdView.as_view(), name='message_to_ad' ),
 
 

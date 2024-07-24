@@ -9,7 +9,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ('username',)
 
 class RealEstateSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
@@ -137,7 +137,11 @@ class OtherImagesSerializer(serializers.ModelSerializer):
         
         return other
         
-        
+
+
+
+
+    
 
 
 

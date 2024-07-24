@@ -305,5 +305,57 @@ class OtherImage(models.Model):
         return str(self.other.title)
 
 
+class Message(models.Model):
+    sender = models.ForeignKey(User,on_delete=models.CASCADE,related_name='message_sender')
+    context = models.TextField(blank=True,null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-  
+    def __str__(self):
+        return str(self.context)
+
+class CarConversation(models.Model):
+    car_ad = models.ForeignKey(Car,on_delete=models.CASCADE,related_name='car_conversation')
+    starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='car_starter_conv')
+    messages = models.ManyToManyField(Message)
+
+class RealEstateConversation(models.Model):
+    realestate_ad = models.ForeignKey(RealEstate,on_delete=models.CASCADE,related_name='realestate_conversation')
+    starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='realestate_starter_conv')
+    messages = models.ManyToManyField(Message)
+
+class OtherConversation(models.Model):
+    other_ad = models.ForeignKey(OthersAds,on_delete=models.CASCADE,related_name='other_conversation')
+    starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='other_starter_conv')
+    messages = models.ManyToManyField(Message)
+
+
+# from django_resized import ResizedImageField
+
+# User = get_user_model()
+
+# class Conversation(models.Model):
+#     starter = models.ForeignKey(
+#         User, on_delete=models.SET_NULL, null=True, related_name="convo_starter"
+#     )
+#     receiver = models.ForeignKey(
+#         User, on_delete=models.SET_NULL, null=True, related_name="convo_receiver"
+#     )
+#     start_time = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self) -> str:
+#         return f"{self.starter.username}"
+
+
+# class Message(models.Model):
+#     sender = models.ForeignKey(User, on_delete=models.SET_NULL,
+#                               null=True, related_name='message_sender')
+#     text = models.CharField(max_length=200, blank=True)
+#     attachment = ResizedImageField(force_format='WEBP', size=None,scale=0.5, quality=75, upload_to='chats/images/', blank=True, null=True)
+#     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="message_conversation")
+#     timestamp = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         ordering = ('-timestamp',)
+
+#     def __str__(self) -> str:
+#         return f"{self.conversation}_{self.sender}"

@@ -4,10 +4,10 @@ from rest_framework import status,permissions
 from rest_framework.response import Response
 from .models import  RealEstate, Car
 from .serializers import *
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from account.models import Profile, SavedAds
 from django.db.models import Q
+from .utils import io
 # Create your views here.
 class CategoryView(APIView):
     serializer_class = CategorySerializer
@@ -21,8 +21,8 @@ class RealEstateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
-        realstate = RealEstate.objects.all()
-        serializer = RealEstateSerializer(realstate,many=True)
+        realestate = RealEstate.objects.all()
+        serializer = RealEstateSerializer(realestate,many=True)
         return Response(serializer.data)
 
     def post(self,request):
@@ -137,7 +137,7 @@ class AdsDetailView(APIView):
             add.save()
             return Response('add is deleted')
         
-        elif category_name =='real_estate':
+        elif category_name =='realestate':
             add = RealEstate.objects.get(id =id)
             user = request.user
             if add.user == user:
@@ -156,17 +156,6 @@ class AdsDetailView(APIView):
     
 
 
-
-
-
-        
-
-
-
-
-
-
-
 class SaveAdsView(APIView):
     permission_classes = [IsAuthenticated] 
 
@@ -181,7 +170,7 @@ class SaveAdsView(APIView):
                 serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
                 saved_data.append(serializer.data)
             
-            if ad.category_name == 'real_estate':
+            if ad.category_name == 'realestate':
                 serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
                 saved_data.append(serializer.data)
 
@@ -218,7 +207,7 @@ class SaveAdsView(APIView):
 class SearchByCategoryView(APIView):
     
     
-    def get(self, request, category_name, sub_name, *args, **kwargs):
+    def post(self, request, category_name, sub_name, *args, **kwargs):
 
        
         if category_name.lower() == 'car':
@@ -226,7 +215,7 @@ class SearchByCategoryView(APIView):
             serializer =CarSerializer(adds,many=True)
             print('--------------------------', adds)
             return Response(serializer.data)
-        elif category_name.lower() == 'real_state':
+        elif category_name.lower() == 'realestate':
             real_state = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name))
             serializer = RealEstateSerializer(real_state,many=True)
             return Response(serializer.data)
@@ -239,32 +228,14 @@ class SearchByCategoryView(APIView):
 
 class SearchAdsView(APIView):
     
-    def get(self,request):
+    def post(self,request):
         title = request.data['title']
         city = request.data['city']
         sorted_data = get_data_by_search(title, city)
-
-        user = request.user
-        profile = Profile.objects.get(user=user)
-        saved_ads = profile.Saved_Ads.all()
-        saved_data = []
-        for ad in saved_ads:
-            
-            if ad.category_name == 'car':
-                serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
-            
-            if ad.category_name == 'real_estate':
-                serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
-
-            if ad.category_name == 'other':
-                serializer = OtherAdsSerializer(OthersAds.objects.get(id=ad.ads_id))
-                saved_data.append(serializer.data)
+        
 
 
-        return Response({'All_ads':sorted_data,
-                         'Saved_ads':saved_data})
+        return Response({'All_ads':sorted_data})
 
 
 def get_data_by_search(title_name, city_name ):
@@ -273,8 +244,10 @@ def get_data_by_search(title_name, city_name ):
 
         (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
+        # |(Q(City=city_name) )
+)
 
-    )
+
     car_ads_serializer = CarSerializer(car_ads,many = True)
     for data in car_ads_serializer.data:
         all_data.append(data)
@@ -307,25 +280,38 @@ def get_data_by_search(title_name, city_name ):
 
     return sorted_data
 
+from .utils import io
+
+# class ConverstationsView(APIView):
+#     permission_classes = [IsAuthenticated, ]
+#     def get(self, request):
+#         conversation = Conversation.objects.filter( Q(starter=request.user) |
+#                                                     Q(receiver=request.user)
+#                                                 )
+#         if conversation.exists():
+#             serializer = ConversationSerializer(conversation, many=True)
+#             return Response(io._success(serializer.data))
+#         else:
+#             io._error('You have not any conversations.')
 
 
+# class ConversationMessageView(APIView):
+#     permission_classes = [IsAuthenticated,]
 
-# print(sorted_data)
-        # user = request.user
-        # profile = Profile.objects.get(user=user)
-        # saved_ads = profile.Saved_Ads.all()
-        # saved_data = []
-        # for ad in saved_ads:
-            
-        #     if ad.category_name == 'car':
-        #         serializer = CarSerializer(Car.objects.get(id=ad.ads_id))
-        #         saved_data.append(serializer.data)
-            
-        #     if ad.category_name == 'real_estate':
-        #         serializer = RealEstateSerializer(RealEstate.objects.get(id=ad.ads_id))
-        #         saved_data.append(serializer.data)
-
-        #     if ad.category_name == 'other':
-        #         serializer = OtherAdsSerializer(OthersAds.objects.get(id=ad.ads_id))
-        #         saved_data.append(serializer.data)
-        
+#     # change it to post methods
+#     def post(self, request, username):
+#         print('__________________', request.user, username)
+#         try:
+#             conversation = Conversation.objects.get(
+#                 Q(starter__username=username, receiver__username=request.user) | 
+#                 Q(receiver__username=username, starter__username=request.user)
+#             )
+#             serializer = MessageSerializer(conversation.message_conversation.all(), many=True)
+#             return Response(serializer.data)
+#         except:
+#             receiver = User.objects.filter(username=username)
+#             if receiver.exists():
+#                 conversation = Conversation.objects.create(starter=request.user, receiver=receiver[0])
+#                 return Response(io._success(f"conversation with {username} was created successfully."))
+#             else:
+#                 io._error("No user was found with this username.")

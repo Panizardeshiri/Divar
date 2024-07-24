@@ -20,13 +20,16 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
+    
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
+    'channels',
     'account',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -35,7 +38,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'mail_templated',
     'advertisement',
-    'channels'
+    'django_resized',
+    
   
 
 
@@ -83,7 +87,7 @@ TEMPLATES = [
         },
     },
 ]
-# WSGI_APPLICATION = 'Divar.wsgi.application'
+WSGI_APPLICATION = 'Divar.wsgi.application'
 ASGI_APPLICATION = "Divar.asgi.application"
 AUTH_USER_MODEL = 'account.User'
 
@@ -91,19 +95,22 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
         'CONFIG': {
-            "host": [("localhost", 5672)],
+             "host": [('127.0.0.1', 6379)],
         },
     },
 }
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
-        'CONFIG': {
-            "host": [("localhost", 5672)],
-        },
-    },
-}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+#         'CONFIG': {
+#             "host": [("localhost", 5672)],
+#         },
+#     },
+# }
 
 DATABASES = {
 'default': {
