@@ -75,6 +75,7 @@ class UserLoginSerializer(TokenObtainPairSerializer):
         except:
             raise serializers.ValidationError({"detail": "Invalid password"})
         data['username'] = self.user.username
+        data['user_id'] = self.user.id
         data['access_exp'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         data['refresh_exp'] = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
         return data

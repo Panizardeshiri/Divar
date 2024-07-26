@@ -13,24 +13,35 @@ User = get_user_model()
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
         # Extract the username from the URL
-        username = self.scope['url_route']['kwargs'].get('username', None)
+        print('==========================222222============', self.scope['user'].id)
+        sender_id = self.scope['url_route']['kwargs'].get('user_id', None)
         category = self.scope['url_route']['kwargs'].get('category', None)
         ad_id = self.scope['url_route']['kwargs'].get('ad_id', None)
-        # print(ad_id)
-        # ad = Car.objects.get(id=ad_id)
-        # print(ad)
-        other_username = User.objects.get(username='moji')
+        
+        if category == 'car':
+            ad = Car.objects.get(id =ad_id )
+            receiver_id = ad.user.id
+            
+        
+        if category == 'realestate':
+            ad = RealEstate.objects.get(id =ad_id )
+            receiver_id = ad.user.id
+            
+
+        if category == 'other':
+            ad = OthersAds.objects.get(id =ad_id )
+            receiver_id = ad.user.id
+            
+       
         
 
         
+        self.room_name = f'room_{sender_id}_{receiver_id}_{category}_{ad_id}'
+        print(f'room_name:{self.room_name}')
+        self.room_group_name = f'chat_{sender_id}_{receiver_id}_{category}_{ad_id}'
+        print(f'room_group_name:{self.room_group_name} ')
 
-
-    
-        self.username = username
-        self.room_name = f'room_{username}_{other_username.username}'
-        self.room_group_name = f'chat_{username}_{other_username.username}'
-
-            # Join the room group
+        
         self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -49,13 +60,18 @@ class ChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         print('-----------------------', text_data_json)
         text = text_data_json.get('message', '')
-        sender = User.objects.get(username='moji')
+        message_sender = text_data_json.get('sender', '')
+        message_sender = User.objects.get(username=text_data_json.get('sender', ''))
+        # print(ms,'!!!####')
+
+        sender_id = self.scope['url_route']['kwargs'].get('user_id', None)
+        sender = User.objects.get(id=sender_id)
+        
+        # conversation.messa
         print(text)
         category = self.scope['url_route']['kwargs'].get('category', None)
         ad_id = self.scope['url_route']['kwargs'].get('ad_id', None)
-        print(ad_id)
-        ad = Car.objects.get(id=ad_id)
-        print(ad)
+        
         if category == 'car':
             ad = Car.objects.get(id=ad_id)
 
@@ -63,7 +79,7 @@ class ChatConsumer(WebsocketConsumer):
             print(conversation)
             if conversation is None:
                 conversation = CarConversation.objects.create(car_ad=ad, starter=sender)
-            new_message = Message.objects.create(sender=sender, context=text)
+            new_message = Message.objects.create( sender=message_sender,context=text)
             conversation.messages.add(new_message)
         
         if category == 'realestate':
@@ -73,7 +89,7 @@ class ChatConsumer(WebsocketConsumer):
             print(conversation)
             if conversation is None:
                 conversation = RealEstateConversation.objects.create(realestate_ad=ad, starter=sender)
-            new_message = Message.objects.create(sender=sender, context=text)
+            new_message = Message.objects.create(sender=message_sender, context=text)
             conversation.messages.add(new_message)
         
         if category == 'other':
@@ -83,7 +99,7 @@ class ChatConsumer(WebsocketConsumer):
             print(conversation)
             if conversation is None:
                 conversation = OtherConversation.objects.create(other_ad=ad, starter=sender)
-            new_message = Message.objects.create(sender=sender, context=text)
+            new_message = Message.objects.create(sender= message_sender,context=text)
             conversation.messages.add(new_message)
        
 
@@ -93,7 +109,7 @@ class ChatConsumer(WebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': text,
-                'username': self.username
+                # 'username': self.username
             }
         )
 

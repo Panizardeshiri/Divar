@@ -26,6 +26,7 @@ class RealEstateView(APIView):
         return Response(serializer.data)
 
     def post(self,request):
+        print('---------------------------', request.data)
         user = request.user
         if user == User.objects.get(id = request.data['user']):
 
@@ -207,23 +208,32 @@ class SaveAdsView(APIView):
 class SearchByCategoryView(APIView):
     
     
-    def post(self, request, category_name, sub_name, *args, **kwargs):
+    def get(self, request, category_name, sub_name, *args, **kwargs):
 
-       
+        print('(((((())))))', category_name, sub_name)
+
         if category_name.lower() == 'car':
-            adds = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(BodyType=sub_name))
+            adds = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(BodyType=sub_name)).order_by('-id')
             serializer =CarSerializer(adds,many=True)
-            print('--------------------------', adds)
-            return Response(serializer.data)
+            
+
         elif category_name.lower() == 'realestate':
-            real_state = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name))
+            print('pppppppppppppppppp', sub_name)
+            real_state = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name)).order_by('-id')
             serializer = RealEstateSerializer(real_state,many=True)
-            return Response(serializer.data)
+            print('pppppppppppppppppp', real_state)
+
         
         elif category_name.lower() == 'other':
-            other = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name))
+            other = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) & Q(Propertytype=sub_name)).order_by('-id')
             serializer = OtherAdsSerializer(other,many=True)
+
+        
+        if serializer.data:
             return Response(serializer.data)
+        else:
+            return Response('not_found')
+
 
 
 class SearchAdsView(APIView):
@@ -280,7 +290,23 @@ def get_data_by_search(title_name, city_name ):
 
     return sorted_data
 
-from .utils import io
+class ConversationListView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+
+        user= request.user
+        car_convs = CarConversation.objects.filter(Q(starter =user)| Q(car_ad__user=user))
+        realestate_convs = RealEstateConversation.objects.filter(Q(starter =user)| Q(realestate_ad__user=user))
+        other_convs = OtherConversation.objects.filter(Q(starter =user)| Q(other_ad__user=user))
+        car_convs_serializer =CarConversationSerializer(car_convs,many=True)
+        realestate_convs_serializer =RealestateConversationSerializer (realestate_convs,many=True)
+        other_convs_serializer = OtherConversationSerializer(other_convs,many=True)
+        data = car_convs_serializer.data + realestate_convs_serializer.data + other_convs_serializer.data
+        return Response({'conversation-list':data})
+    
+# from .utils import io
 
 # class ConverstationsView(APIView):
 #     permission_classes = [IsAuthenticated, ]

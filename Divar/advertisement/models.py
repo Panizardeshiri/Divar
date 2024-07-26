@@ -32,16 +32,16 @@ class RealEstate(models.Model):
     class PropertyType(models.TextChoices):
      # Actual value ↓      # ↓ Displayed on Django Admin 
          
-        APARTMENT = 'Apartment', 'apartment'
-        HOUSE = 'House', 'house'
-        VILLA = 'Villa', 'villa'
-        STUDIO = 'Studio', 'studio'
-        PENTHOUSE = 'Penthouse', 'penthouse'
-        RESIDENCE = 'Residence', 'residence'
-        UNDERCONSTRUCTIONBUILDING = 'Under Construction Building', 'under construction building'
-        LAND = 'Land', 'land'
-        COMMERCIALPROPERTY = 'Commercial Property', 'commercial property'
-        WAREHOUSE = 'Warehouse', 'warehouse'
+        APARTMENT = 'apartment', 'apartment'
+        HOUSE = 'house', 'house'
+        VILLA = 'villa', 'villa'
+        STUDIO = 'studio', 'studio'
+        PENTHOUSE = 'penthouse', 'penthouse'
+        RESIDENCE = 'residence', 'residence'
+        UNDERCONSTRUCTIONBUILDING = 'underconstructionbuilding', 'under construction building'
+        LAND = 'land', 'land'
+        COMMERCIALPROPERTY = 'commercialproperty', 'commercial property'
+        WAREHOUSE = 'warehouse', 'warehouse'
 
     Propertytype = models.CharField(
         max_length=150,
@@ -143,8 +143,8 @@ class Car(models.Model):
      
         CABRIOLET = 'cabriolet', 'cabriolet'
         COUPE = 'coupe', 'coupe'
-        HATCHBACK5DOOR = 'hatchback-5-Door', 'hatchback 5 door'
-        HATCHBACK3DOOR = 'Hatchback-3-Door', 'hatchback 3 door'
+        HATCHBACK5DOOR = 'hatchback5door', 'hatchback 5 door'
+        HATCHBACK3DOOR = 'hatchback3door', 'hatchback 3 door'
         SEDAN = 'sedan', 'sedan'
         STATIONWAGON = 'stationwagon', 'stationwagon'
         SUV = 'suv', 'suv'
@@ -226,10 +226,10 @@ class OthersAds(models.Model):
             return json.dumps(images_url)
     
     class PropertyType(models.TextChoices):
-        DIGITALGOODS = 'Digital Goods', 'digital goods'
-        KITCHEN = 'Kitchen', 'kitchen'
-        INTERTAINMENT = 'Intertainment', 'intertainment'
-        PERSONALITEMS = 'Personal Items', 'personal items'
+        DIGITALGOODS = 'digitalgoods', 'digital goods'
+        KITCHEN = 'kitchen', 'kitchen'
+        INTERTAINMENT = 'intertainment', 'intertainment'
+        PERSONALITEMS = 'personalitems', 'personal items'
         
 
     Propertytype = models.CharField(
