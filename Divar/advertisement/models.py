@@ -317,17 +317,23 @@ class CarConversation(models.Model):
     car_ad = models.ForeignKey(Car,on_delete=models.CASCADE,related_name='car_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='car_starter_conv')
     messages = models.ManyToManyField(Message)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class RealEstateConversation(models.Model):
     realestate_ad = models.ForeignKey(RealEstate,on_delete=models.CASCADE,related_name='realestate_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='realestate_starter_conv')
     messages = models.ManyToManyField(Message)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
 class OtherConversation(models.Model):
     other_ad = models.ForeignKey(OthersAds,on_delete=models.CASCADE,related_name='other_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='other_starter_conv')
     messages = models.ManyToManyField(Message)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 # from django_resized import ResizedImageField
 

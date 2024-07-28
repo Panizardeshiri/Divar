@@ -61,6 +61,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4200',
     'http://172.0.0.1:4200',
+    "http://192.168.2.1"
 ]
 from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -93,12 +94,13 @@ AUTH_USER_MODEL = 'account.User'
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_rabbitmq.core.RabbitmqChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-             "host": [('127.0.0.1', 6379)],
+            "hosts": [('127.0.0.1', 6379)],
         },
     },
 }
+
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"

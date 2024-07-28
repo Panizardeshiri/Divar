@@ -142,4 +142,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-/migrations
+migrations/
+mediafiles/
+migrations/
+__pycache__/

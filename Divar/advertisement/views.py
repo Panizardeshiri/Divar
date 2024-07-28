@@ -298,46 +298,38 @@ class ConversationListView(APIView):
 
         user= request.user
         car_convs = CarConversation.objects.filter(Q(starter =user)| Q(car_ad__user=user))
+        
         realestate_convs = RealEstateConversation.objects.filter(Q(starter =user)| Q(realestate_ad__user=user))
         other_convs = OtherConversation.objects.filter(Q(starter =user)| Q(other_ad__user=user))
         car_convs_serializer =CarConversationSerializer(car_convs,many=True)
         realestate_convs_serializer =RealestateConversationSerializer (realestate_convs,many=True)
         other_convs_serializer = OtherConversationSerializer(other_convs,many=True)
         data = car_convs_serializer.data + realestate_convs_serializer.data + other_convs_serializer.data
+        
         return Response({'conversation-list':data})
     
-# from .utils import io
-
-# class ConverstationsView(APIView):
-#     permission_classes = [IsAuthenticated, ]
-#     def get(self, request):
-#         conversation = Conversation.objects.filter( Q(starter=request.user) |
-#                                                     Q(receiver=request.user)
-#                                                 )
-#         if conversation.exists():
-#             serializer = ConversationSerializer(conversation, many=True)
-#             return Response(io._success(serializer.data))
-#         else:
-#             io._error('You have not any conversations.')
 
 
-# class ConversationMessageView(APIView):
-#     permission_classes = [IsAuthenticated,]
 
-#     # change it to post methods
-#     def post(self, request, username):
-#         print('__________________', request.user, username)
-#         try:
-#             conversation = Conversation.objects.get(
-#                 Q(starter__username=username, receiver__username=request.user) | 
-#                 Q(receiver__username=username, starter__username=request.user)
-#             )
-#             serializer = MessageSerializer(conversation.message_conversation.all(), many=True)
-#             return Response(serializer.data)
-#         except:
-#             receiver = User.objects.filter(username=username)
-#             if receiver.exists():
-#                 conversation = Conversation.objects.create(starter=request.user, receiver=receiver[0])
-#                 return Response(io._success(f"conversation with {username} was created successfully."))
-#             else:
-#                 io._error("No user was found with this username.")
+class MessagesListView(APIView):
+
+    def get(self,request,user_id,category_name,ad_id):
+
+        if category_name == 'car':
+            car_convs = CarConversation.objects.get(Q(starter_id=user_id) & Q(car_ad=ad_id))
+            car_convs_serializer =CarConversationSerializer(car_convs)
+            
+            return Response({'messages':car_convs_serializer.data['messages']})
+        
+        if category_name == 'realestate':
+            realestate_convs = RealEstateConversation.objects.get(Q(starter_id=user_id) & Q(realestate_ad=ad_id))
+            realestate_convs_serializer =RealestateConversationSerializer(realestate_convs)
+            
+            return Response({'messages':realestate_convs_serializer.data['messages']})
+        
+        if category_name == 'other':
+            other_convs = OtherConversation.objects.get(Q(starter_id=user_id) & Q(other_ad=ad_id))
+            other_convs_serializer =OtherConversationSerializer(other_convs)
+            
+            return Response({'messages':other_convs_serializer.data['messages']})
+            
