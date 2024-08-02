@@ -110,21 +110,21 @@ class AdsDetailView(APIView):
             add = Car.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = CarSerializer(add)
+            serializer = CarDetailSerializer(add)
             return Response(serializer.data)
         
         elif category_name =='realestate':
             add = RealEstate.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = RealEstateSerializer(add)
+            serializer = RealEstateDetailSerializer(add)
             return Response(serializer.data)
         
         elif category_name =='other':
             add = OthersAds.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = OtherAdsSerializer(add)
+            serializer = OtherAdsDetailSerializer(add)
             return Response(serializer.data)
             
     
@@ -153,6 +153,34 @@ class AdsDetailView(APIView):
                 add.Is_show = False
             add.save()
             return Response('add is deleted')
+    
+
+    def patch(self, request, category_name, id):
+        if category_name == 'car':
+            ad = Car.objects.get(id=id)
+            if ad.user != request.user:
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = CarImagesSerializer(ad, data=request.data, partial=True)
+        
+        elif category_name == 'realestate':
+            ad = RealEstate.objects.get(id=id)
+            if ad.user != request.user:
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = RealestateImagesSerializer(ad, data=request.data, partial=True)
+        
+        elif category_name == 'other':
+            ad = OthersAds.objects.get(id=id)
+            if ad.user != request.user:
+                return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = OtherImagesSerializer(ad, data=request.data, partial=True)
+        
+        else:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     
 
@@ -297,17 +325,62 @@ class ConversationListView(APIView):
     def get(self,request):
 
         user= request.user
-        car_convs = CarConversation.objects.filter(Q(starter =user)| Q(car_ad__user=user))
+         
+        cars = Car.objects.filter(user=user)
+        car_serializer = CarSerializer(cars,many=True)
+        realestate = RealEstate.objects.filter(user=user)
+        realestate_serializer = RealEstateSerializer(realestate,many = True)
+        others = OthersAds.objects.filter(user=user)
+        other_serializer = OtherAdsSerializer(others,many=True)
+        admin_message_data = car_serializer.data + realestate_serializer.data + other_serializer.data
+        sorted_messages_data = sorted(admin_message_data, key=lambda x: x['created_date'], reverse=True)
+
+
+        data = []
+        car_convs = CarConversation.objects.filter(Q(starter =user)| Q(ad__user=user))
+        if car_convs:
+            car_convs_serializer =CarConversationSerializer(car_convs,many=True)
+            for car_conv in car_convs_serializer.data:
+                data.append(car_conv)
+
+        realestate_convs = RealEstateConversation.objects.filter(Q(starter =user)| Q(ad__user=user))
+        if realestate_convs:
+            realestate_convs_serializer =RealestateConversationSerializer(realestate_convs,many=True)
+            for realestate_conv in realestate_convs_serializer.data:
+                data.append(realestate_conv)
+        other_convs = OtherConversation.objects.filter(Q(starter =user)| Q(ad__user=user))
+        if other_convs:
+            other_convs_serializer =OtherConversationSerializer(other_convs,many=True)
+            for other_conv in other_convs_serializer.data:
+                data.append(other_conv)
         
-        realestate_convs = RealEstateConversation.objects.filter(Q(starter =user)| Q(realestate_ad__user=user))
-        other_convs = OtherConversation.objects.filter(Q(starter =user)| Q(other_ad__user=user))
-        car_convs_serializer =CarConversationSerializer(car_convs,many=True)
-        realestate_convs_serializer =RealestateConversationSerializer (realestate_convs,many=True)
-        other_convs_serializer = OtherConversationSerializer(other_convs,many=True)
-        data = car_convs_serializer.data + realestate_convs_serializer.data + other_convs_serializer.data
+        sorted_data = sorted(data, key=lambda x: x['updated_at'], reverse=True)
         
-        return Response({'conversation-list':data})
-    
+        return Response({'conversation_list':sorted_data,
+                         'admin_messages':sorted_messages_data})
+
+class AdminMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+
+    def get(self,request,category_name,ad_id):
+
+        if category_name =='car':
+            add = Car.objects.get(id =ad_id)
+            serializer = CarSerializer(add)
+            return Response(serializer.data)
+        
+        elif category_name =='realestate':
+            add = RealEstate.objects.get(id =ad_id)
+            serializer = RealEstateSerializer(add)
+            return Response(serializer.data)
+        
+        elif category_name =='other':
+            add = OthersAds.objects.get(id =ad_id)
+            serializer = OtherAdsSerializer(add)
+            return Response(serializer.data)
+            
+
 
 
 
@@ -316,20 +389,21 @@ class MessagesListView(APIView):
     def get(self,request,user_id,category_name,ad_id):
 
         if category_name == 'car':
-            car_convs = CarConversation.objects.get(Q(starter_id=user_id) & Q(car_ad=ad_id))
+            car_convs = CarConversation.objects.get(Q(starter_id=user_id) & Q(ad=ad_id))
             car_convs_serializer =CarConversationSerializer(car_convs)
             
             return Response({'messages':car_convs_serializer.data['messages']})
         
         if category_name == 'realestate':
-            realestate_convs = RealEstateConversation.objects.get(Q(starter_id=user_id) & Q(realestate_ad=ad_id))
+            realestate_convs = RealEstateConversation.objects.get(Q(starter_id=user_id) & Q(ad=ad_id))
             realestate_convs_serializer =RealestateConversationSerializer(realestate_convs)
             
             return Response({'messages':realestate_convs_serializer.data['messages']})
         
         if category_name == 'other':
-            other_convs = OtherConversation.objects.get(Q(starter_id=user_id) & Q(other_ad=ad_id))
+            other_convs = OtherConversation.objects.get(Q(starter_id=user_id) & Q(ad=ad_id))
             other_convs_serializer =OtherConversationSerializer(other_convs)
             
             return Response({'messages':other_convs_serializer.data['messages']})
             
+ 

@@ -207,20 +207,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_conversation(self,category, ad, user):
         if category.lower() == 'car':
-            return CarConversation.objects.filter(car_ad=ad, starter=user).first()
+            return CarConversation.objects.filter(ad=ad, starter=user).first()
         if category.lower() == 'realestate':
-            return RealEstateConversation.objects.filter(realestate_ad=ad, starter=user).first()
+            return RealEstateConversation.objects.filter(ad=ad, starter=user).first()
         if category.lower() == 'other':
-            return OtherConversation.objects.filter(other_ad=ad, starter=user).first()
+            return OtherConversation.objects.filter(ad=ad, starter=user).first()
         
     @database_sync_to_async
     def create_conversation(self, category, ad, user):
         if category.lower() == 'car':
-            return CarConversation.objects.create(car_ad=ad, starter=user)
+            return CarConversation.objects.create(ad=ad, starter=user)
         if category.lower() == 'realestate':
-            return RealEstateConversation.objects.create(realestate_ad=ad, starter=user)
+            return RealEstateConversation.objects.create(ad=ad, starter=user)
         if category.lower() == 'other':
-            return OtherConversation.objects.create(other_ad=ad, starter=user)
+            return OtherConversation.objects.create(ad=ad, starter=user)
         
     @database_sync_to_async
     def create_message(self, message, sender, conversation):
@@ -228,5 +228,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         conversation.messages.add(new_message)
         conversation.save()
         return new_message
+
 
         

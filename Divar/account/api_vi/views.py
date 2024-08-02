@@ -59,6 +59,9 @@ class UserVerificationAPIView(APIView):
 class UserLoginView(TokenObtainPairView):
 
     serializer_class = UserLoginSerializer
+        
+        
+
 
 
 class UserLogoutView(TokenBlacklistView):
@@ -98,13 +101,16 @@ class ResetPassAPIView(APIView):
 
     def post(self,request):
         serializer = self.serializer_class(data=request.data)
+        print( '555555555555555555555555555555555555555____', request.data)
         serializer.is_valid(raise_exception=True)
-        user = request.user
-        if user.forget_code == serializer.validated_data['forget_code']:
-            user.set_password(serializer.validated_data['new_password'])
+        print( '555555555555555555555555555555555555555____', serializer.data)
+        user = User.objects.get(username=serializer.data['username'])
+        if user.forget_code == serializer.data['forget_code']:
+            user.set_password(serializer.data['new_password'])
             return Response({'detail':{'message':'You successfully reset your password.'}})
         else:
             return Response({'detail':{'message':'Please enter your right code.'}})
+
 
 
 class ProfileView(APIView):
@@ -142,9 +148,6 @@ class ProfileView(APIView):
         serializer= self.serializer_class(profile) 
         
         return Response(serializer.data)          
-
-
-
 
 
 

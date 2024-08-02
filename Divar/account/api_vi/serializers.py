@@ -8,6 +8,10 @@ import re
 from rest_framework.response import Response
 from ..models.profile import *
 from advertisement.serializers import *
+from django.contrib.auth import authenticate
+
+
+
 
 User = get_user_model()
 
@@ -64,22 +68,32 @@ class UserVerificationSerializer(serializers.Serializer):
 
     
 class UserLoginSerializer(TokenObtainPairSerializer):
+      def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
 
-    def validate(self, attrs):
-        user = User.objects.get(username=attrs.get('username'))
-        if not user:
+        # Check if the user exists
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
             raise serializers.ValidationError({"detail": "No active account found with the given credentials"})
 
-        try:
-            data = super().validate(attrs)
-        except:
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+        if user is None:
             raise serializers.ValidationError({"detail": "Invalid password"})
-        data['username'] = self.user.username
-        data['user_id'] = self.user.id
+
+        # Call the parent class's validate method to get tokens
+        data = super().validate(attrs)
+
+        # Add additional user details to the response
+        data['username'] = user.username
+        data['user_id'] = user.id
         data['access_exp'] = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
         data['refresh_exp'] = settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME']
         return data
 
+    
 
 class UserLogoutSerializer(TokenBlacklistSerializer):
     def validate(self, attrs):
@@ -95,10 +109,10 @@ class ForgetPassSerializer(serializers.Serializer):
 
 
 class ResetPassSerializer(serializers.Serializer):
-
+    username = serializers.CharField(max_length=60)
     forget_code = serializers.CharField(max_length=6)
-    new_password = serializers.CharField(max_length=250, write_only=True)
-    new_password_confirm = serializers.CharField(max_length=250, write_only=True)
+    new_password = serializers.CharField(max_length=250)
+    new_password_confirm = serializers.CharField(max_length=250)
 
     def validate(self, attrs):
         if attrs.get('new_password') != attrs.get('new_password_confirm'):

@@ -16,6 +16,7 @@ urlpatterns = [
     path('search-ads/', SearchAdsView.as_view(), name='search_ads' ),
     path('carconversation-list/',ConversationListView.as_view(),name='carconversation_list'),
     path('messages-list/<int:user_id>/<str:category_name>/<int:ad_id>',MessagesListView.as_view(),name='messages_list'),
+    path('admin-messages/<str:category_name>/<int:ad_id>',AdminMessageView.as_view(),name='admin_messages')
     # path('conversations/', ConverstationsView.as_view(), name='conversations'  ),
     # path('conversations/<str:username>/', ConversationMessageView.as_view(), name='conversation_messages'  ),
     # path('message-to-ad/<int:id>', MessageToAdView.as_view(), name='message_to_ad' ),

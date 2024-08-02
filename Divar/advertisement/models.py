@@ -5,6 +5,8 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth import get_user_model
 import json
+from django.utils import timezone
+
 
 User = get_user_model()
 # Create your models here.
@@ -314,26 +316,41 @@ class Message(models.Model):
         return str(self.context)
 
 class CarConversation(models.Model):
-    car_ad = models.ForeignKey(Car,on_delete=models.CASCADE,related_name='car_conversation')
+    ad = models.ForeignKey(Car,on_delete=models.CASCADE,related_name='car_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='car_starter_conv')
     messages = models.ManyToManyField(Message)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
+
 class RealEstateConversation(models.Model):
-    realestate_ad = models.ForeignKey(RealEstate,on_delete=models.CASCADE,related_name='realestate_conversation')
+    ad = models.ForeignKey(RealEstate,on_delete=models.CASCADE,related_name='realestate_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='realestate_starter_conv')
     messages = models.ManyToManyField(Message)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
+
 
 class OtherConversation(models.Model):
-    other_ad = models.ForeignKey(OthersAds,on_delete=models.CASCADE,related_name='other_conversation')
+    ad = models.ForeignKey(OthersAds,on_delete=models.CASCADE,related_name='other_conversation')
     starter =  models.ForeignKey(User,on_delete=models.CASCADE,related_name='other_starter_conv')
     messages = models.ManyToManyField(Message)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
 
 # from django_resized import ResizedImageField
 
