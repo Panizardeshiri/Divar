@@ -28,7 +28,7 @@ class RealEstate(models.Model):
             domain_url = settings.DOMAIN_URL
             images_url = []
             for profile_image in self.real_estate_image.all():
-                images_url.append( {'image':domain_url+profile_image.image.url})
+                images_url.append( {'image':domain_url+profile_image.image.url, 'id':profile_image.id})
             return json.dumps(images_url)
 
     class PropertyType(models.TextChoices):
@@ -138,7 +138,7 @@ class Car(models.Model):
         domain_url = settings.DOMAIN_URL
         images_url = []
         for profile_image in self.car_image.all():
-            images_url.append( { "image" :domain_url+profile_image.image.url})
+            images_url.append( { "image" :domain_url+profile_image.image.url, 'id':profile_image.id})
         return json.dumps(images_url)
 
     class BodyType(models.TextChoices):
@@ -221,11 +221,12 @@ class OthersAds(models.Model):
     title =models.CharField(max_length=250,blank=True,null=True)
     description =models.TextField(blank=True,null=True)
     def get_other_images(self):
-            domain_url = settings.DOMAIN_URL
-            images_url = []
-            for profile_image in self.other_image.all():
-                images_url.append( {'image':domain_url+profile_image.image.url})
-            return json.dumps(images_url)
+        domain_url = settings.DOMAIN_URL
+        images_url = []
+        print('-------------------------------')
+        for profile_image in self.other_image.all():
+            images_url.append( {'image':domain_url+profile_image.image.url, 'id':profile_image.id})
+        return json.dumps(images_url)
     
     class PropertyType(models.TextChoices):
         DIGITALGOODS = 'digitalgoods', 'digital goods'
@@ -351,34 +352,3 @@ class OtherConversation(models.Model):
         if self.pk:
             self.updated_at = timezone.now()
         super().save(*args, **kwargs)
-
-# from django_resized import ResizedImageField
-
-# User = get_user_model()
-
-# class Conversation(models.Model):
-#     starter = models.ForeignKey(
-#         User, on_delete=models.SET_NULL, null=True, related_name="convo_starter"
-#     )
-#     receiver = models.ForeignKey(
-#         User, on_delete=models.SET_NULL, null=True, related_name="convo_receiver"
-#     )
-#     start_time = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self) -> str:
-#         return f"{self.starter.username}"
-
-
-# class Message(models.Model):
-#     sender = models.ForeignKey(User, on_delete=models.SET_NULL,
-#                               null=True, related_name='message_sender')
-#     text = models.CharField(max_length=200, blank=True)
-#     attachment = ResizedImageField(force_format='WEBP', size=None,scale=0.5, quality=75, upload_to='chats/images/', blank=True, null=True)
-#     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="message_conversation")
-#     timestamp = models.DateTimeField(auto_now_add=True)
-
-#     class Meta:
-#         ordering = ('-timestamp',)
-
-#     def __str__(self) -> str:
-#         return f"{self.conversation}_{self.sender}"

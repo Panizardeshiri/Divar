@@ -219,6 +219,6 @@ EMAIL_PORT = 587
 
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
 MEDIA_URL = '/mediafiles/'
-# DOMAIN_URL = 'http://127.0.0.1:8000'
-DOMAIN_URL = 'http://0.0.0.0:8000'
+DOMAIN_URL = 'http://127.0.0.1:8000'
+# DOMAIN_URL = 'http://0.0.0.0:8000'
 

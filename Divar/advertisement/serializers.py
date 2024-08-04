@@ -28,11 +28,11 @@ class RealestateImageSerializer(serializers.ModelSerializer):
 class RealEstateDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     user = UserSerializer()
-    real_estate_image = RealestateImageSerializer(many = True, read_only = True)
+    images = RealestateImageSerializer(many = True, read_only = True)
     
 
     class Meta:
-        model = OthersAds
+        model = RealEstate
         fields = '__all__'
 
 
@@ -56,7 +56,7 @@ class OtherImageSerializer(serializers.ModelSerializer):
 class OtherAdsDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     user = UserSerializer()
-    other_image = OtherImageSerializer(many = True, read_only = True)
+    images = OtherImageSerializer(many = True, read_only = True)
     
 
     class Meta:
@@ -74,8 +74,7 @@ class CarSerializer(serializers.ModelSerializer):
     category        = CategorySerializer()
     user            = UserSerializer()
     images = serializers.CharField(source="get_car_images")
-    car_image = CarImageSerializer(many = True, read_only = True)
-   
+    
     class Meta:
         model = Car
         fields = '__all__'
@@ -83,7 +82,7 @@ class CarSerializer(serializers.ModelSerializer):
 class CarDetailSerializer(serializers.ModelSerializer):
     category        = CategorySerializer()
     user            = UserSerializer()
-    car_image = CarImageSerializer(many = True, read_only = True)
+    images = CarImageSerializer(many = True, read_only = True)
    
     class Meta:
         model = Car
@@ -334,45 +333,18 @@ class OtherConversationSerializer(serializers.ModelSerializer):
 
 
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-# class AdvertisementImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = AdvertisementImage
-#         fields = '__all__'
-
-
-# class AdvertiseSerializer(serializers.ModelSerializer):
-#     ad_image = AdvertisementImageSerializer(many = True, read_only = True)
-#     uploaded_images = serializers.ListField(
-#         child=serializers.ImageField(max_length =1000000,allow_empty_file =False, use_url = False, write_only = True)
-#         )
-    
-#     class Meta:
-#         model = Advertisement
-#         fields = ('name','category','user','uploaded_images','ad_image')
 
     
-#     def create(self,validated_data):
-#         uploaded_images = validated_data.pop('uploaded_images')
-#         advertisement = Advertisement.objects.create(**validated_data)
-        
-        
-#         for image in uploaded_images:
-#             AdvertisementImage.objects.create(advertisement=advertisement, image = image)
-        
-#         return advertisement
+
+
+
+
+
+
+
+
+
+
 
 
 

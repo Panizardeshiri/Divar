@@ -110,21 +110,21 @@ class AdsDetailView(APIView):
             add = Car.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = CarDetailSerializer(add)
+            serializer = CarSerializer(add)
             return Response(serializer.data)
         
         elif category_name =='realestate':
             add = RealEstate.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = RealEstateDetailSerializer(add)
+            serializer = RealEstateSerializer(add)
             return Response(serializer.data)
         
         elif category_name =='other':
             add = OthersAds.objects.get(id =id)
             add.Visit_count +=1
             add.save()
-            serializer = OtherAdsDetailSerializer(add)
+            serializer = OtherAdsSerializer(add)
             return Response(serializer.data)
             
     
@@ -326,11 +326,11 @@ class ConversationListView(APIView):
 
         user= request.user
          
-        cars = Car.objects.filter(user=user)
+        cars = Car.objects.filter(user=user).exclude(admin_message__exact='')
         car_serializer = CarSerializer(cars,many=True)
-        realestate = RealEstate.objects.filter(user=user)
+        realestate = RealEstate.objects.filter(user=user ).exclude(admin_message__exact='')
         realestate_serializer = RealEstateSerializer(realestate,many = True)
-        others = OthersAds.objects.filter(user=user)
+        others = OthersAds.objects.filter(user=user).exclude(admin_message__exact='')
         other_serializer = OtherAdsSerializer(others,many=True)
         admin_message_data = car_serializer.data + realestate_serializer.data + other_serializer.data
         sorted_messages_data = sorted(admin_message_data, key=lambda x: x['created_date'], reverse=True)
@@ -406,4 +406,3 @@ class MessagesListView(APIView):
             
             return Response({'messages':other_convs_serializer.data['messages']})
             
- 
