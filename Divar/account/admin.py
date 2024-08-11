@@ -17,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
        }),
        ('permissions', {
            "fields": (
-               'is_staff', 'is_active','is_superuser','is_verified'
+               'is_staff', 'is_active','is_superuser','is_verified', 'stars',
 
            ),
        }),
@@ -25,7 +25,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email','password1','password2', 'is_staff', 'is_active','is_superuser','is_verified')}
+            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_active', 'is_superuser', 'stars', 'is_verified')}
          ),
     )
 

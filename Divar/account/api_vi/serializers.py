@@ -138,26 +138,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_Saved_Ads(self, obj):
         saved_ads = obj.Saved_Ads.all()
         saved_data = []
-        for ad in saved_ads:            
-            if ad.category_name == 'car':
-                cars = Car.objects.filter(id=ad.ads_id)
-                if cars.exists():
-                    print('((((((((((((((((()))))))))))))))))', cars[0])
-                    serializer = CarSerializer(cars)
-                    saved_data.append(serializer.data[0])
+        for ad in saved_ads:         
+            if ad.category_name.lower() == 'car':
+                cars = Car.objects.get(id=ad.ads_id)
+                serializer = CarSerializer(cars)
+                saved_data.append(serializer.data)
             
-            if ad.category_name == 'real_estate':
-                real_state = RealEstate.objects.filter(id=ad.ads_id)
-                if real_state.exists():
-                    serializer = RealEstateSerializer(real_state)
-                    saved_data.append(serializer.data)
+            if ad.category_name.lower() == 'realestate':
+                real_state = RealEstate.objects.get(id=ad.ads_id)
+                # if real_state.exists():
+                serializer = RealEstateSerializer(real_state)
+                saved_data.append(serializer.data)
 
-            if ad.category_name == 'other':
-                other_ads = OthersAds.objects.filter(id=ad.ads_id)
+            if ad.category_name.lower() == 'other':
+                other_ads = OthersAds.objects.get(id=ad.ads_id)
                 serializer = OtherAdsSerializer(other_ads)
                 saved_data.append(serializer.data)
             
-        # sorted_saved_data = sorted(saved_data, key=lambda x: x['created_date'], reverse=True)
+        sorted_saved_data = sorted(saved_data, key=lambda x: x['created_date'], reverse=True)
         return saved_data
     
     # def get_My_Ads(self, obj):

@@ -101,6 +101,17 @@ class HomeView(APIView):
 
         return Response({'All_ads':sorted_data})
 
+def chek_saved_ads_for_user(user, category, ad_id):
+    if user.is_authenticated:
+        
+        saved_ads = SavedAds.objects.filter(Q(user=user) & Q( category_name__icontains = category))
+        for ad in saved_ads:
+            print('save ad id is: ', ad.ads_id, '--- ad is is : ', ad_id)
+            if int(ad.ads_id) == int(ad_id):
+                return True
+        return False    
+    else:
+        return False
 
 class AdsDetailView(APIView):
 
@@ -111,21 +122,36 @@ class AdsDetailView(APIView):
             add.Visit_count +=1
             add.save()
             serializer = CarSerializer(add)
-            return Response(serializer.data)
+            
         
         elif category_name =='realestate':
             add = RealEstate.objects.get(id =id)
             add.Visit_count +=1
             add.save()
             serializer = RealEstateSerializer(add)
-            return Response(serializer.data)
+
         
         elif category_name =='other':
             add = OthersAds.objects.get(id =id)
             add.Visit_count +=1
             add.save()
             serializer = OtherAdsSerializer(add)
-            return Response(serializer.data)
+
+
+        final_response = serializer.data.copy()
+        if chek_saved_ads_for_user(request.user, add.category.name, add.id):
+            final_response['is_saved'] = "true"
+        else: 
+            final_response['is_saved'] = "false"
+        print('----------------',add.user.stars)
+
+        if add.user.stars:
+            if int(add.user.stars)  > 0 :
+                final_response['is_star'] = "true"
+        else :
+            final_response['is_star'] = "false"
+        
+        return Response(final_response)
             
     
     def delete(self,request,category_name,id):
@@ -215,18 +241,19 @@ class SaveAdsView(APIView):
             
     def post(self, request):
         profile = Profile.objects.get(user=request.user)
+        print('----------------------------------------------------------', request.data)
+        saved_ads = SavedAds.objects.filter(user=request.user, category_name=request.data['category_name'], ads_id=request.data['ads_id'])
+        print('====================================================', saved_ads )
         if request.data['status']=='save':
-            saved_ads = SavedAds.objects.create(user=request.user,category_name=request.data['category_name'], ads_id=request.data['ads_id'])
-            profile.Saved_Ads.add(saved_ads)
-            profile.save()
+            if not saved_ads.exists():
+                saved_ads = SavedAds.objects.create(user=request.user, category_name=request.data['category_name'], ads_id=request.data['ads_id'])
+                profile.Saved_Ads.add(saved_ads)
+                profile.save()
         if request.data['status'] == 'delete':
-            
-            print('----------------------------------------------------------', request.user)
-            saved_ads = SavedAds.objects.filter(user=request.user, category_name=request.data['category_name'], ads_id=request.data['ads_id'])
-            print('----------------------------------------------------------', saved_ads)
-
             if saved_ads.exists():
-                profile.Saved_Ads.remove(saved_ads[0].id)
+                print('----------------------------------------------------------', saved_ads)
+                profile.Saved_Ads.remove(saved_ads[0])
+                saved_ads[0].delete()
                 profile.save()
 
         return Response('ok')

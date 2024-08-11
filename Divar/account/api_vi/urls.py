@@ -14,6 +14,7 @@ urlpatterns = [
     path('forget-pass/', ForgetPassAPIView.as_view(), name='forget_pass'),
     path('reset-pass/', ResetPassAPIView.as_view(), name='reset_pass'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('resend-verificaiton-code/', ResendVerificationCode.as_view(), name='resend_verification_code')
     # path('change-password/', ChangePasswordView.as_view(), name='change_password'),
     # path('email/verify/<str:token>', VerifyEmailApiView.as_view(), name='email_verify'),
     # path('email/resend/', ResendEmailVerificationApiView.as_view(), name='resend_email'),

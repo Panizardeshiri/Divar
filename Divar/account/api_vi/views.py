@@ -40,6 +40,23 @@ class UserRegistrationAPIView(APIView):
             }
         },status=status.HTTP_201_CREATED)
     
+class ResendVerificationCode(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        code = create_verification_code()
+        user.verification_code = code
+        user.save()
+
+        verification_email = EmailMessage('email/email_varification.html', 
+                                    {'token':code}, 
+                                    'djdivarr@gmail.com', 
+                                    [user.email],
+                                    )
+        
+        EmailThreading(verification_email).start()
+        return Response({'hash_code' : hash_user_code(code)})
+
 
 class UserVerificationAPIView(APIView):
     serializer_class = UserVerificationSerializer
