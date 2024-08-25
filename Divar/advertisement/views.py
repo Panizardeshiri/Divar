@@ -305,12 +305,11 @@ class SearchAdsView(APIView):
 
 def get_data_by_search(title_name, city_name ):
     all_data = []
-    car_ads = Car.objects.filter(Q(Is_show=True) & Q(is_published = True) &
-
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
+    car_ads = Car.objects.filter(
+        Q(Is_show=True) & Q(is_published = True) &
+        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & ( Q(City__icontains= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
-        # |(Q(City=city_name) )
-)
+    )
 
 
     car_ads_serializer = CarSerializer(car_ads,many = True)
@@ -320,7 +319,7 @@ def get_data_by_search(title_name, city_name ):
 
     real_estate_ads = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) &
 
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
+        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City__icontains= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
 
     )
@@ -332,7 +331,7 @@ def get_data_by_search(title_name, city_name ):
 
     other_ads = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) &
 
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City= city_name) ) |
+        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City__icontains= city_name) ) |
         (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
 
     )
@@ -341,7 +340,7 @@ def get_data_by_search(title_name, city_name ):
         all_data.append(data)
 
     sorted_data = sorted(all_data, key=lambda x: x['created_date'], reverse=True)
-    print(sorted_data,'******&&&&&&&&%^$%')
+
 
     return sorted_data
 
