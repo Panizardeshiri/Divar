@@ -10,6 +10,7 @@ urlpatterns = [
     path('real-estate/',RealEstateView.as_view(),name='realstate'),
     path('car/',CarView.as_view(),name='car'),
     path('otherAds/',OtherAdsView.as_view(),name='otherAds'), 
+    path('filter/',FilterView.as_view(),name='filter'),
     path('category/<str:category_name>/<str:sub_name>', SearchByCategoryView.as_view(), name='search-by-category'),
     path('saved-ads/', SaveAdsView.as_view(), name='saved_ads' ),
     path('ads-detail/<str:category_name>/<int:id>', AdsDetailView.as_view(), name='ads_detail'),

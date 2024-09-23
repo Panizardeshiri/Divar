@@ -100,6 +100,59 @@ class HomeView(APIView):
         
 
         return Response({'All_ads':sorted_data})
+    
+def safe_float_price(ad):
+    try:
+        return float(ad.get('Price', '0').replace(',', '').strip())
+    except ValueError:
+        return 0.0
+
+def sort_ads(data, filter_type):
+    if filter_type == 'newest':
+        return sorted(data, key=lambda x: x['created_date'], reverse=True)
+    elif filter_type == 'oldest':
+        return sorted(data, key=lambda x: x['created_date'])
+    elif filter_type == 'cheapest':
+        return sorted(data, key=safe_float_price)
+    elif filter_type == 'most_expensive':
+        return sorted(data, key=safe_float_price, reverse=True)
+    elif filter_type == 'least_visited':
+        return sorted(data, key=lambda x: x['Visit_count'])
+    elif filter_type == 'most_visited':
+        return sorted(data, key=lambda x: x['Visit_count'], reverse=True)
+    else:
+        return data  # No filter applied
+
+class FilterView(APIView):
+
+    def get(self, request):
+        filter_type = request.query_params.get('filter_type', None)
+        # print('**',filter_type)
+
+        # Fetch ads
+        cars = Car.objects.filter(Q(Is_show=True) & Q(is_published=True))
+        real_states = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published=True))
+        other_ads = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published=True))
+
+        car_serializer = CarSerializer(cars, many=True)
+        realstate_serializer = RealEstateSerializer(real_states, many=True)
+        otherAds_serializer = OtherAdsSerializer(other_ads, many=True)
+
+        data = car_serializer.data + realstate_serializer.data + otherAds_serializer.data
+
+        sorted_data = sort_ads(data, filter_type)
+
+        return Response({'All_ads': sorted_data})
+
+
+       
+
+      
+
+
+
+
+
 
 def chek_saved_ads_for_user(user, category, ad_id):
     if user.is_authenticated:
@@ -295,7 +348,7 @@ class SearchAdsView(APIView):
     
     def post(self,request):
         title = request.data['title']
-        city = request.data['city']
+        city = request.data.get('city', None) 
         sorted_data = get_data_by_search(title, city)
         
 
@@ -303,46 +356,42 @@ class SearchAdsView(APIView):
         return Response({'All_ads':sorted_data})
 
 
-def get_data_by_search(title_name, city_name ):
+def get_data_by_search(title_name, city_name=None):
     all_data = []
-    car_ads = Car.objects.filter(
-        Q(Is_show=True) & Q(is_published = True) &
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & ( Q(City__icontains= city_name) ) |
-        (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
+
+    # Build the base query for filtering
+    base_query = Q(Is_show=True) & Q(is_published=True) & (
+        Q(title__icontains=title_name) | 
+        Q(description__icontains=title_name) | 
+        Q(category__name__icontains=title_name)
     )
 
+    if city_name:  # Only include city filter if city_name is provided
+        city_query = Q(City__icontains=city_name)
+    else:
+        city_query = Q()  # No city filter
 
-    car_ads_serializer = CarSerializer(car_ads,many = True)
-    for data in car_ads_serializer.data:
-        all_data.append(data)
-    
+    # Combine the base query and city query for each model
+    car_ads = Car.objects.filter(base_query & city_query)
+    car_ads_serializer = CarSerializer(car_ads, many=True)
+    all_data.extend(car_ads_serializer.data)
 
-    real_estate_ads = RealEstate.objects.filter(Q(Is_show=True) & Q(is_published = True) &
+    real_estate_ads = RealEstate.objects.filter(base_query & city_query)
+    real_estate_ads_serializer = RealEstateSerializer(real_estate_ads, many=True)
+    all_data.extend(real_estate_ads_serializer.data)
 
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City__icontains= city_name) ) |
-        (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
+    other_ads = OthersAds.objects.filter(base_query & city_query)
+    other_ads_serializer = OtherAdsSerializer(other_ads, many=True)
+    all_data.extend(other_ads_serializer.data)
 
-    )
-    real_estate_ads_serializer = RealEstateSerializer(real_estate_ads,many = True)
-    for data in real_estate_ads_serializer.data:
-        all_data.append(data)
-    
-
-
-    other_ads = OthersAds.objects.filter(Q(Is_show=True) & Q(is_published = True) &
-
-        (Q(title__icontains=title_name)|Q(description__icontains=title_name) | Q(category__name__icontains=title_name) ) & (  Q(City__icontains= city_name) ) |
-        (     Q( title__icontains=city_name) | Q( description__icontains=city_name)   )
-
-    )
-    other_ads_serializer = OtherAdsSerializer(other_ads,many = True)
-    for data in other_ads_serializer.data:
-        all_data.append(data)
-
+    # Sort the combined results by created_date
     sorted_data = sorted(all_data, key=lambda x: x['created_date'], reverse=True)
 
-
     return sorted_data
+
+
+
+
 
 class ConversationListView(APIView):
 
