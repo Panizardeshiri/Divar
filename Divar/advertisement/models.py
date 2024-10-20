@@ -10,17 +10,20 @@ from django.utils import timezone
 
 User = get_user_model()
 # Create your models here.
+
 class Category(models.Model):
     name = models.CharField(max_length=150)
 
     def __str__(self):
         return self.name
 
+
+
     
 
 class RealEstate(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name = 'real_user')
-    category = models.ForeignKey(Category,on_delete=models.CASCADE,related_name = 'real_cat')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='real_cat')
     title =models.CharField(max_length=250,blank=True,null=True)
     description =models.TextField(blank=True,null=True)
 
@@ -130,7 +133,7 @@ class RealEstate(models.Model):
 
 class Car(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name = 'car_user')
-    category = models.ForeignKey(Category,on_delete=models.CASCADE,related_name = 'car_cat')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='car_cat')
     title =models.CharField(max_length=250,blank=True,null=True)
     description =models.TextField(blank=True,null=True)
 
@@ -217,7 +220,7 @@ class Car(models.Model):
 
 class OthersAds(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='otherad_user')
-    category = models.ForeignKey(Category,on_delete=models.CASCADE,related_name = 'otherad_cat')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='otherad_cat')
     title =models.CharField(max_length=250,blank=True,null=True)
     description =models.TextField(blank=True,null=True)
     def get_other_images(self):
