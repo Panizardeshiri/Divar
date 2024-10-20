@@ -68,7 +68,7 @@ class RealEstate(models.Model):
         default=TitleDeedType.TURKISHTITLEDEED
     )
  
-    Price = models.DecimalField(max_digits=150,decimal_places=2,default=0)
+    Price = models.CharField(max_length=255)
 
     Size = models.DecimalField(max_digits=150,decimal_places=2,default=0)
 
@@ -202,7 +202,7 @@ class Car(models.Model):
         choices=Status.choices,
         default=Status.UNUSED
     )
-    Price = models.DecimalField(max_digits=150,decimal_places=2,default=0)
+    Price = models.CharField(max_length=255)
     City =models.CharField(max_length=300,blank=True,null=True)
     Visit_count =models.IntegerField(default=0)
     Is_show = models.BooleanField(default=True)
@@ -233,6 +233,9 @@ class OthersAds(models.Model):
         KITCHEN = 'kitchen', 'kitchen'
         INTERTAINMENT = 'intertainment', 'intertainment'
         PERSONALITEMS = 'personalitems', 'personal items'
+        JOB = 'job', 'job',
+        SERVICES = 'services', 'services',
+        OTHER = 'other', 'other'
         
 
     Propertytype = models.CharField(
@@ -240,7 +243,8 @@ class OthersAds(models.Model):
         choices=PropertyType.choices,
         default=PropertyType.DIGITALGOODS
     )
-    Price = models.DecimalField(max_digits=150,decimal_places=2,default=0)
+    Price = models.CharField(max_length=255)
+    
     class Status(models.TextChoices):
         UNUSED = 'Unused', 'unused'
         USED = 'Used', 'used'
