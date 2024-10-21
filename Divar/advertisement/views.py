@@ -170,21 +170,21 @@ class AdsDetailView(APIView):
 
     def get(self,request,category_name,id):
 
-        if category_name =='car':
+        if category_name.lower() =='car':
             add = Car.objects.get(id =id)
             add.Visit_count +=1
             add.save()
             serializer = CarSerializer(add)
             
         
-        elif category_name =='realestate':
+        elif category_name.lower() =='realestate':
             add = RealEstate.objects.get(id =id)
             add.Visit_count +=1
             add.save()
             serializer = RealEstateSerializer(add)
 
         
-        elif category_name =='other':
+        elif category_name.lower() =='others':
             add = OthersAds.objects.get(id =id)
             add.Visit_count +=1
             add.save()
