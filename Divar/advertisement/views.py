@@ -108,17 +108,17 @@ def safe_float_price(ad):
         return 0.0
 
 def sort_ads(data, filter_type):
-    if filter_type == 'newest':
+    if filter_type.lower() == 'newest':
         return sorted(data, key=lambda x: x['created_date'], reverse=True)
-    elif filter_type == 'oldest':
+    elif filter_type.lower() == 'oldest':
         return sorted(data, key=lambda x: x['created_date'])
-    elif filter_type == 'cheapest':
+    elif filter_type.lower() == 'cheapest':
         return sorted(data, key=safe_float_price)
-    elif filter_type == 'most_expensive':
+    elif filter_type.lower() == 'most_expensive':
         return sorted(data, key=safe_float_price, reverse=True)
-    elif filter_type == 'least_visited':
+    elif filter_type.lower() == 'least_visited':
         return sorted(data, key=lambda x: x['Visit_count'])
-    elif filter_type == 'most_visited':
+    elif filter_type.lower() == 'most_visited':
         return sorted(data, key=lambda x: x['Visit_count'], reverse=True)
     else:
         return data  # No filter applied
