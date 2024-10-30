@@ -101,11 +101,26 @@ class HomeView(APIView):
 
         return Response({'All_ads':sorted_data})
     
+
+
+
+def currency_to_usd(price_str):
+    if 'USD' in price_str:
+        return float(price_str.replace('USD', '').strip())
+    elif 'EUR' in price_str:
+        return float(price_str.replace('EUR', '').strip()) * 1.085 
+    elif 'TRY' in price_str:
+        return float(price_str.replace('TRY', '').strip()) * 0.029  
+    return 0.0
+
 def safe_float_price(ad):
     try:
-        return float(ad.get('Price', '0').replace('usd', '').strip())
+        return currency_to_usd(ad.get('Price', '0'))
     except ValueError:
         return 0.0
+
+
+
 
 def sort_ads(data, filter_type):
     if filter_type.lower() == 'newest':
