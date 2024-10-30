@@ -103,7 +103,7 @@ class HomeView(APIView):
     
 def safe_float_price(ad):
     try:
-        return float(ad.get('Price', '0').replace(',', '').strip())
+        return float(ad.get('Price', '0').replace('usd', '').strip())
     except ValueError:
         return 0.0
 
